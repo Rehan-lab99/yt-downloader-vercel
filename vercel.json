@@ -13,6 +13,7 @@
   ],
   "env": {
     "PYTHONUNBUFFERED": "1",
-    "VERCEL": "1"
+    "VERCEL": "1",
+    "PYTHONPATH": "/var/runtime:/var/task"
   }
 }
