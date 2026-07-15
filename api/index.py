@@ -4,21 +4,45 @@ import os
 import json
 import uuid
 import time
+import re
 
-# Create Flask app with correct paths
 app = Flask(__name__, 
             template_folder='../templates',
             static_folder='../static')
 
-# Use /tmp for Vercel (only writable directory)
+# Use /tmp for Vercel
 DOWNLOAD_FOLDER = '/tmp/downloads'
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 download_progress = {}
 
+# Custom yt-dlp options for Vercel
+YDL_OPTS = {
+    'quiet': True,
+    'no_warnings': True,
+    'ignoreerrors': True,
+    'extract_flat': False,
+    'force_generic_extractor': False,
+    'nocheckcertificate': True,
+    'prefer_insecure': True,
+}
+
+def extract_video_id(url):
+    """Extract YouTube video ID from URL"""
+    patterns = [
+        r'(?:youtube\.com\/watch\?v=)([\w-]+)',
+        r'(?:youtu\.be\/)([\w-]+)',
+        r'(?:youtube\.com\/embed\/)([\w-]+)',
+        r'(?:youtube\.com\/v\/)([\w-]+)'
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None
+
 @app.route('/')
 def index():
-    """Home page"""
     try:
         return render_template('index.html')
     except Exception as e:
@@ -26,7 +50,6 @@ def index():
 
 @app.route('/api/info', methods=['POST'])
 def get_info():
-    """Get video information"""
     try:
         data = request.json
         url = data.get('url', '').strip()
@@ -34,11 +57,27 @@ def get_info():
         if not url:
             return jsonify({'error': 'URL is required'}), 400
         
+        # Validate YouTube URL
+        if not ('youtube.com' in url or 'youtu.be' in url):
+            return jsonify({'error': 'Only YouTube URLs are supported'}), 400
+        
+        # Extract video ID
+        video_id = extract_video_id(url)
+        if not video_id:
+            return jsonify({'error': 'Invalid YouTube URL'}), 400
+        
+        # Use direct video URL for better compatibility
+        if 'youtu.be' in url:
+            url = f"https://www.youtube.com/watch?v={video_id}"
+        
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
-            'extract_flat': True,
             'ignoreerrors': True,
+            'extract_flat': False,
+            'force_generic_extractor': False,
+            'nocheckcertificate': True,
+            'prefer_insecure': True,
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -66,7 +105,6 @@ def get_info():
                     'videos': videos
                 })
             else:
-                # Single video
                 formats = []
                 for f in info.get('formats', []):
                     formats.append({
@@ -94,7 +132,6 @@ def get_info():
 
 @app.route('/api/download', methods=['POST'])
 def start_download():
-    """Start download"""
     try:
         data = request.json
         url = data.get('url', '').strip()
@@ -105,16 +142,28 @@ def start_download():
         if not url:
             return jsonify({'error': 'URL is required'}), 400
         
+        # Validate YouTube URL
+        if not ('youtube.com' in url or 'youtu.be' in url):
+            return jsonify({'error': 'Only YouTube URLs are supported'}), 400
+        
         task_id = str(uuid.uuid4())
         
-        # Prepare download options
+        # Prepare download options with fallback
+        if audio_only:
+            format_string = 'bestaudio/best'
+        else:
+            format_string = f'{format_id}/best'
+        
         ydl_opts = {
-            'format': format_id if not audio_only else 'bestaudio/best',
+            'format': format_string,
             'outtmpl': f'/tmp/%(title)s.%(ext)s',
             'quiet': True,
             'no_warnings': True,
             'ignoreerrors': True,
-            'concurrent_fragments': 10,
+            'nocheckcertificate': True,
+            'prefer_insecure': True,
+            'extract_flat': False,
+            'force_generic_extractor': False,
         }
         
         if audio_only:
@@ -136,51 +185,60 @@ def start_download():
             'filename': ''
         }
         
-        # Start download
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)
                 
-                if info:
-                    # Get filename
-                    filename = ydl.prepare_filename(info)
-                    
-                    # If audio only, check for mp3
-                    if audio_only:
-                        base_name = filename.rsplit('.', 1)[0]
-                        if os.path.exists(f'{base_name}.mp3'):
-                            filename = f'{base_name}.mp3'
-                    
-                    # Check if file exists
-                    if os.path.exists(filename):
-                        download_progress[task_id] = {
-                            'status': 'completed',
-                            'progress': 100,
-                            'filename': os.path.basename(filename)
-                        }
-                    else:
-                        # Try to find file
-                        for f in os.listdir('/tmp'):
-                            if f.startswith(os.path.basename(filename).rsplit('.', 1)[0]):
-                                download_progress[task_id] = {
-                                    'status': 'completed',
-                                    'progress': 100,
-                                    'filename': f
-                                }
-                                break
-                        else:
-                            download_progress[task_id] = {
-                                'status': 'error',
-                                'progress': 0,
-                                'error': 'File not found after download'
-                            }
-                else:
+                if not info:
                     download_progress[task_id] = {
                         'status': 'error',
                         'progress': 0,
                         'error': 'No info extracted'
                     }
-                    
+                    return jsonify({'task_id': task_id, 'status': 'error'})
+                
+                # Get filename
+                filename = ydl.prepare_filename(info)
+                
+                if audio_only:
+                    base_name = filename.rsplit('.', 1)[0]
+                    if os.path.exists(f'{base_name}.mp3'):
+                        filename = f'{base_name}.mp3'
+                
+                # Check if file exists
+                if os.path.exists(filename):
+                    download_progress[task_id] = {
+                        'status': 'completed',
+                        'progress': 100,
+                        'filename': os.path.basename(filename)
+                    }
+                else:
+                    # Search for file
+                    for f in os.listdir('/tmp'):
+                        if f.startswith(os.path.basename(filename).rsplit('.', 1)[0]):
+                            download_progress[task_id] = {
+                                'status': 'completed',
+                                'progress': 100,
+                                'filename': f
+                            }
+                            break
+                    else:
+                        download_progress[task_id] = {
+                            'status': 'error',
+                            'progress': 0,
+                            'error': 'File not found after download'
+                        }
+                        
+        except yt_dlp.utils.DownloadError as e:
+            if 'Video unavailable' in str(e):
+                error_msg = 'Video is unavailable or private'
+            else:
+                error_msg = str(e)
+            download_progress[task_id] = {
+                'status': 'error',
+                'progress': 0,
+                'error': error_msg
+            }
         except Exception as e:
             download_progress[task_id] = {
                 'status': 'error',
@@ -198,7 +256,6 @@ def start_download():
 
 @app.route('/api/progress/<task_id>')
 def get_progress(task_id):
-    """Get download progress"""
     progress = download_progress.get(task_id, {
         'status': 'not_found',
         'progress': 0
@@ -207,11 +264,9 @@ def get_progress(task_id):
 
 @app.route('/api/download/<filename>')
 def download_file(filename):
-    """Download the completed file"""
     try:
         filepath = os.path.join(DOWNLOAD_FOLDER, filename)
         if not os.path.exists(filepath):
-            # Try /tmp directly
             filepath = os.path.join('/tmp', filename)
         
         if os.path.exists(filepath):
@@ -227,24 +282,30 @@ def download_file(filename):
 
 @app.route('/api/debug')
 def debug():
-    """Debug endpoint"""
     import sys
     try:
+        # Test yt-dlp
+        test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        test_result = None
+        try:
+            with yt_dlp.YoutubeDL({'quiet': True, 'no_warnings': True}) as ydl:
+                test_info = ydl.extract_info(test_url, download=False)
+                test_result = "Success: " + test_info.get('title', 'No title')
+        except Exception as e:
+            test_result = "Error: " + str(e)
+        
         return jsonify({
             'status': 'working',
             'python_version': sys.version,
+            'yt_dlp_working': test_result,
             'download_folder': DOWNLOAD_FOLDER,
             'folder_exists': os.path.exists(DOWNLOAD_FOLDER),
             'is_writable': os.access(DOWNLOAD_FOLDER, os.W_OK),
-            'template_folder': app.template_folder,
-            'static_folder': app.static_folder,
-            'templates_exist': os.path.exists(app.template_folder),
-            'index_exists': os.path.exists(os.path.join(app.template_folder, 'index.html'))
+            'template_exists': os.path.exists(os.path.join(app.template_folder, 'index.html'))
         })
     except Exception as e:
         return jsonify({'error': str(e)})
 
-# This is what Vercel looks for
 app = app
 
 if __name__ == '__main__':
