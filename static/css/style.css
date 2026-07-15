@@ -1,0 +1,448 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+h1 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 28px;
+}
+
+h1 .icon {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+/* Input Group */
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 15px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.input-group input::placeholder {
+    color: #aaa;
+}
+
+.input-group button {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.input-group button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.input-group button:active {
+    transform: scale(0.97);
+}
+
+.input-group button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* URL Actions */
+.url-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.url-actions button {
+    padding: 8px 16px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.url-actions button:hover {
+    background: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.url-actions button:active {
+    transform: scale(0.95);
+}
+
+/* Info Section */
+#info {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    display: none;
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#info .thumbnail {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+#info h2 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #333;
+    line-height: 1.4;
+}
+
+#info p {
+    color: #666;
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+#info p .label {
+    font-weight: 600;
+    color: #555;
+}
+
+/* Format Options */
+.format-options {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.format-options label {
+    display: block;
+    margin: 8px 0;
+    cursor: pointer;
+    color: #555;
+    font-size: 14px;
+}
+
+.format-options label:hover {
+    color: #333;
+}
+
+.format-options input[type="radio"],
+.format-options input[type="checkbox"] {
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.format-options select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 8px;
+    background: white;
+    color: #333;
+    transition: border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.format-options select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Download Button */
+.download-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #00b894, #00a86b);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
+}
+
+.download-btn:active {
+    transform: scale(0.97);
+}
+
+.download-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Progress Section */
+#progress {
+    margin-top: 20px;
+    display: none;
+    animation: slideDown 0.4s ease;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.3s ease;
+    width: 0%;
+    border-radius: 4px;
+}
+
+.progress-status {
+    margin-top: 12px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+.progress-status .download-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.progress-status .download-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Error Section */
+#error {
+    margin-top: 20px;
+    padding: 15px 20px;
+    background: #fee;
+    border-left: 4px solid #ff4757;
+    border-radius: 8px;
+    color: #c0392b;
+    display: none;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Loading Spinner */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .input-group button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .url-actions {
+        flex-wrap: wrap;
+    }
+
+    .url-actions button {
+        flex: 1;
+        text-align: center;
+        min-width: 60px;
+    }
+
+    #info .thumbnail {
+        max-height: 150px;
+    }
+
+    .format-options label {
+        font-size: 13px;
+    }
+
+    .download-btn {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .container {
+        background: #1a1a2e;
+    }
+
+    h1 {
+        color: #eee;
+    }
+
+    .subtitle {
+        color: #aaa;
+    }
+
+    .input-group input {
+        background: #2a2a4a;
+        border-color: #3a3a5a;
+        color: #eee;
+    }
+
+    .input-group input:focus {
+        border-color: #667eea;
+    }
+
+    .input-group input::placeholder {
+        color: #888;
+    }
+
+    #info {
+        background: #2a2a4a;
+    }
+
+    #info h2 {
+        color: #eee;
+    }
+
+    #info p {
+        color: #aaa;
+    }
+
+    .format-options label {
+        color: #aaa;
+    }
+
+    .format-options select {
+        background: #2a2a4a;
+        border-color: #3a3a5a;
+        color: #eee;
+    }
+
+    .url-actions button {
+        background: #2a2a4a;
+        color: #aaa;
+    }
+
+    .url-actions button:hover {
+        background: #3a3a5a;
+    }
+
+    .progress-bar {
+        background: #3a3a5a;
+    }
+}

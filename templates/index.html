@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <span class="icon">🎬</span> YouTube Downloader
+        </h1>
+        <p class="subtitle">Download videos and audio from YouTube</p>
+        
+        <div class="input-group">
+            <input type="text" id="urlInput" placeholder="Paste YouTube URL here...">
+            <button onclick="fetchInfo()" id="fetchBtn">Fetch</button>
+        </div>
+        
+        <div class="url-actions">
+            <button onclick="pasteFromClipboard()">📋 Paste</button>
+            <button onclick="clearInput()">✖️ Clear</button>
+        </div>
+        
+        <div id="info">
+            <img id="thumbnail" class="thumbnail" src="" alt="Thumbnail" style="display:none;">
+            <h2 id="title">Video Title</h2>
+            <p id="details">Duration: --</p>
+            <p id="type">Type: --</p>
+            
+            <div class="format-options">
+                <label>
+                    <input type="radio" name="downloadType" value="video" checked> 
+                    🎥 Video + Audio
+                </label>
+                <label>
+                    <input type="radio" name="downloadType" value="audio"> 
+                    🎵 Audio Only (MP3)
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="subtitlesCheck"> 
+                    📝 Embed Subtitles
+                </label>
+                
+                <select id="formatSelect">
+                    <option value="best">Best Quality</option>
+                    <option value="bestvideo+bestaudio/best">Best Video + Audio</option>
+                    <option value="bestvideo[height<=1080]+bestaudio/best">1080p</option>
+                    <option value="bestvideo[height<=720]+bestaudio/best">720p</option>
+                    <option value="bestvideo[height<=480]+bestaudio/best">480p</option>
+                    <option value="bestaudio">Best Audio Only</option>
+                </select>
+            </div>
+            
+            <button class="download-btn" onclick="startDownload()" id="downloadBtn" disabled>
+                ⬇️ Download
+            </button>
+        </div>
+        
+        <div id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-status" id="progressStatus">Starting...</div>
+        </div>
+        
+        <div id="error"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
